@@ -1,4 +1,3 @@
-%
 % Niniejszy plik stanowi przykład formatowania pracy magisterskiej na
 % Wydziale MIM UW.  Szkielet użytych poleceń można wykorzystywać do
 % woli, np. formatujac wlasna prace.
@@ -16,26 +15,47 @@
 % dodaj opcję [en] dla wersji angielskiej (mogą być obie: [licencjacka,en])
 \documentclass[licencjacka,en]{pracamgr}
 
-% Dane magistranta:
-\autor{Imię Nazwisko}{231040}
+\usepackage{times}
+% \usepackage[marginparwidth=75pt]{geometry}
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
 
-% Dane magistrantów:
-%\autor{Autor Zerowy}{342007}
-%\autori{Autor Pierwszy}{342013}
-%\autorii{Drugi Autor-Z-Rzędu}{231023}
-%\autoriii{Trzeci z Autorów}{777321}
-%\autoriv{Autor nr Cztery}{432145}
-%\autorv{Autor nr Pięć}{342011}
+\usepackage{hyperref}
+\usepackage{url}
+
+% additional packages
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage[capitalise]{cleveref}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tabularray}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{subcaption}
+\usepackage{natbib}  % or \usepackage{biblatex} if you prefer biblatex
+\bibliographystyle{plainnat}  % or another style of your choice
+
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
+
+% Dane magistranta:
+\autor{Bartłomiej Sadlej}{429589}
 
 \title{Title in English}
 \titlepl{Tytuł po polsku}
 
-%\tytulang{An implementation of a difference blabalizer based on the theory of $\sigma$ -- $\rho$ phetors}
 
-%kierunek: 
-% - matematyka, informacyka, ...
-% - Mathematics, Computer Science, ...
-\kierunek{Computer Science}
+\kierunek{Machine Learning}
 
 % informatyka - nie okreslamy zakresu (opcja zakomentowana)
 % matematyka - zakres moze pozostac nieokreslony,
@@ -55,8 +75,8 @@
 % (podać tytuł/stopień imię i nazwisko opiekuna
 % Instytut
 % ew. Wydział ew. Uczelnia (jeżeli nie MIM UW))
-\opiekun{dr hab. Filigran Fifak\\
-  Instytut Blabalii Fetorycznej\\
+\opiekun{prof. Przemysław Biecek\\
+  Wydział Matematyki Informatyki i Mechaniki\\
   }
 
 % miesiąc i~rok:
@@ -66,9 +86,9 @@
 \dziedzina{ 
 %11.0 Matematyka, Informatyka:\\ 
 %11.1 Matematyka\\ 
-11.2 Statystyka\\ 
+% 11.2 Statystyka\\ 
 %11.3 Informatyka\\ 
-%11.4 Sztuczna inteligencja\\ 
+11.4 Sztuczna inteligencja\\ 
 %11.5 Nauki aktuarialne\\
 %11.9 Inne nauki matematyczne i informatyczne
 }
@@ -92,12 +112,12 @@
 
 %tu idzie streszczenie na strone poczatkowa
 \begin{abstract}
-  W~pracy przedstawiono prototypową implementację blabalizatora
-  różnicowego bazującą na teorii fetorów $\sigma$-$\rho$ profesora
-  Fifaka.  Wykorzystanie teorii Fifaka daje wreszcie możliwość
-  efektywnego wykonania blabalizy numerycznej.  Fakt ten stanowi
-  przełom technologiczny, którego konsekwencje trudno z~góry
-  przewidzieć.
+  
+  This thesis explores the generation of invariant sets of images with respect to specific objective functions, particularly in the context of Computer Vision model interpretation. While numerous approaches exist for explaining model behavior through concepts discovery or interpretable approximation, we focus on a novel problem: generating sets of images that yield identical predictions under a given objective function, thereby establishing an equivalence relation.
+
+  Unlike adversarial example optimization, our research aims to develop an algorithm that effectively samples meaningful and diverse examples from these invariant sets, primarily leveraging Diffusion Models for image generation. Building upon recent advances in treating diffusion models as unsupervised priors for inverse problems, we extend existing frameworks to accommodate arbitrary objective functions defined in either image space or model neuron space.
+
+  Our work addresses a significant gap in current research, which has focused primarily on analyzing training data and model behavior on known inputs. By diving into the unexplored domain of alternative inputs yielding identical outcomes, we contribute to a deeper understanding of model behavior and interpretation. We demonstrate the effectiveness of our approach through extensive experiments and provide insights into the practical applications of invariant set generation for model explanation.
 \end{abstract}
 
 \tableofcontents
@@ -107,326 +127,37 @@
 \chapter*{Wprowadzenie}
 \addcontentsline{toc}{chapter}{Wprowadzenie}
 
-Blabalizator różnicowy jest podstawowym narzędziem blabalii
-fetorycznej.  Dlatego naukowcy z~całego świata prześcigają się
-w~próbach efektywnej implementacji.  Opracowana przez prof. Fifaka
-teoria fetorów $\sigma$-$\rho$ otwiera w~tej dziedzinie nowe
-możliwości.  Wykorzystujemy je w~niniejszej pracy.
-
-Przystępne wprowadzenie do blabalii fetorycznej można znaleźć w~pracy
-Fifaka i~Gryzogrzechotalskiego \cite{ffgg}.  Dlatego w~niniejszym
-tekście ograniczymy się do przypomnienia pojęć podstawowych.
-
-Praca składa się z~pięciu rozdziałów i~dodatków.
-W~rozdziale~\ref{r:pojecia} przypomniano podstawowe pojęcia blabalii
-fetorycznej.  Dotychczasowe próby implementacji blablizatora
-różnicowego zestawiono w~rozdziale~\ref{r:losers}.
-Rozdział~\ref{r:fifak} przedstawia teorię Fifaka i~wyjaśnia sposób jej
-wykorzystania w~implementacji blabalizatora.  W~rozdziale \ref{r:impl}
-przedstawiono algorytm blabalizy i~realizujący go program komputerowy.
-Ostatni rozdział zawiera przemyślenia dotyczące możliwego wpływu
-dostępności efektywnej blabalizy numerycznej na rozwój blabalii
-fetorycznej.  W~dodatkach umieszczono najciekawszy fragment programu,
-przykładowe dane i~wyniki działania programu.
-
-\chapter{Podstawowe pojęcia}\label{r:pojecia}
-
-Pojęciem pierwotnym blabalii fetorycznej jest \emph{blaba}.
-Blabaliści nie podają jego definicji, mówiąc za Ciach-Pfe t-\=am
-K\^un (fooistyczny mędrzec, XIX w. p.n.e.):
-\begin{quote}
-  Blaba, który jest blaba, nie jest prawdziwym blaba.
-
-\raggedleft\slshape tłum. z~chińskiego Robert Blarbarucki
-\end{quote}
-
-\section{Definicje}
-
-Oto dwie definicje wprowadzające podstawowe pojęcia blabalii
-fetorycznej:
-
-\begin{defi}\label{skupienie}
-  Silny, zwarty i gotowy fetor bazowy nazwiemy \emph{skupieniem}.
-\end{defi}
-
-\begin{defi}\label{fetor}
-  \emph{Fetorem} nazwiemy skupienie blaba spełniające następujący
-  \emph{aksjomat reperkusatywności}:
-  $$\forall \mathcal{X}\in Z(t)\ \exists
-  \pi\subseteq\oint_{\Omega^2}\kappa\leftrightarrow 42$$
-\end{defi}
+Explaining Computer Vision models is an active area of research in machine learning due to many practical benefits that can be derived from understanding the model's behavior. Over time, diverse approaches have been proposed to find particular features responsible for the model's predictions or to approximate the model's behavior in a more interpretable way \todo{citations}.
+In this work we focus on the problem of finding invariant sets of images that given any objective function result in the same prediction and constitute to a equivalence relation defined by this function and its range.
+Our goal is not to optimize for adversarial examples \todo{citations}, rather to establish an algorithm which can effectivly sample meaningful and diverse examples from the invariant set.
 
 
-\section{Blabalizator różnicowy}
+% \cite{sobieski2024rethinkingvisualcounterfactualexplanations} 
+\chapter{Related work}\label{r:related_work}
 
-Teoretycy blabalii (zob. np. pracę~\cite{grglo}) zadowalają się
-niekonstruktywnym opisem natury fetorów.
+\section{Diverse posterior sampling for Inverse Problem}
+In th past, a lot of work has been done on treating diffusion models as unsupervised priors to solve inverse problems for image restoration such as denoising, inpainting, super-resolution, and deblurring. \todo{add citations}
+Those methods were commonly designed to find a single best solution for the given image.
+More recently the focus has shifted towards producing a range of diverse and meaningful valid solutions for evey image \cite{cohen2024posteriorsamplingmeaningfuldiversity}.
+\cite{chung2024diffusionposteriorsamplinggeneral} demonstrate that score-based diffusion models (SGMs) \cite{song2021scorebasedgenerativemodelingstochastic} can efficiently handle noisy nonlinear inverse problems.
+In our setting, the mesurement almost never lives in the dimensionality of data, which is explored in \cite{batzolis2021conditionalimagegenerationscorebased} and provides systematic comparison of best ways of estimating the conditional score.
 
-Podstawowym narzędziem blabalii empirycznej jest blabalizator
-różnicowy.  Przyrząd ten pozwala w~sposób przybliżony uzyskać
-współczynniki rozkładu Głombaskiego dla fetorów bazowych
-i~harmonicznych.  Praktyczne znaczenie tego procesu jest oczywiste:
-korzystając z~reperkusatywności pozwala on przejść do przestrzeni
-$\Lambda^{\nabla}$, a~tym samym znaleźć retroizotonalne współczynniki
-semi-quasi-celibatu dla klatek Rozkoszy (zob.~\cite{JR}).
+\section{Concepts, Spurious features and Clever Hans detections}
+\cite{Lapuschkin_2019} develops an automatic pipeline to for exploring shortcuts and biases learned by the model which are commonly referred to as Clever Hans \cite{pfungst1911cleverHans}.
+\cite{neuhaus2023spuriousfeatureslargescale} investigates how to automatically find spurious features in the training data.
+Recently \cite{dreyer2025mechanisticunderstandingvalidationlarge} answers the question of what concepts were learned by the model and where in the training data they were present. 
+While those works are great at analyzing the training data and model's behavior on it, we shift our focus on the unexplored area of other inputs which can lead to the same outcomes.
 
-Klasyczne algorytmy dla blabalizatora różnicowego wykorzystują:
-\begin{enumerate}
-\item dualizm falowo-korpuskularny, a w szczególności
-  \begin{enumerate}
-  \item korpuskularną naturę fetorów,
-  \item falową naturę blaba,
-  \item falowo-korpuskularną naturę gryzmołów;
-  \end{enumerate}
-\item postępującą gryzmolizację poszczególnych dziedzin nauki, w
-  szczególności badań systemowych i rozcieńczonych;
-\item dynamizm fazowy stetryczenia parajonizacyjnego;
-\item wreszcie tradycyjne opozycje:
-  \begin{itemize}
-  \item duch --- bakteria,
-  \item mieć --- chcieć,
-  \item myśl --- owsianka,
-  \item parafina --- durszlak\footnote{Więcej o tym przypadku --- patrz
-      prace Gryzybór-Głombaskiego i innych teoretyków nurtu
-      teoretyczno-praktycznego badań w~Instytucie Podstawowych
-      Problemów Blabalii w~Fifie.},
-  \item logos --- termos%\footnote{Szpotański}
-  \end{itemize}
-  z właściwym im przedziwym dynamizmem.
-\end{enumerate}
+\section{Classifier guidance for conditional image generation}
+Diffusion models allows for incorporating an additional guidance signal into the denoising process. Most common approaches are either to use classifier-free guidance \cite{ho2022classifierfreediffusionguidance} and guide the generation with class label or utilise text prompt \cite{rombach2022highresolutionimagesynthesislatent}.
+Both approaches doesn't allow for incorporating new classes or text conditioning models at inference time either due to fixed network architecture or distributions mismatch.
+One way to include any classifier as a guidance signal is to map the noised image to its clean version at each step through the reverse process\cite{jeanneret2022diffusionmodelscounterfactualexplanations} which is very computationally expensive or use Tweedie Formula \citep{robbins1992empirical, chung2022improving, weng2024fast} to estimate the final solution which although introducing some bias works well in practise but limits the number of optimization steps to the number of diffusion steps. 
+\cite{augustin2024digindiffusionguidanceinvestigating} uses classifier guidance to optimize initial noise fed to the diffusion model and makes it computationally feasible due to adoption of Latent Diffusion Models and moving from pixel space to latent space.
+We set out to further extend this framework to arbitrary objective function defined either in the image space or in the model neurons space.
 
-\begin{figure}[tp]
-  \centering
-  \framebox{\vbox to 4cm{\vfil\hbox to
-      7cm{\hfil\tiny.\hfil}\vfil}}
-  \caption{Artystyczna wizja blaba w~obrazie węgierskiego artysty
-    Josipa~A. Rozkoszy pt.~,,Blaba''}
-\end{figure}
+\chapter{LOREM IPSUM}
 
-\chapter{Wcześniejsze implementacje blabalizatora
-  różnicowego}\label{r:losers}
-
-\section{Podejście wprost}
-
-Najprostszym sposobem wykonania blabalizy jest siłowe przeszukanie
-całej przestrzeni rozwiązań.  Jednak, jak łatwo wyliczyć, rozmiar
-przestrzeni rozwiązań rośnie wykładniczo z~liczbą fetorów bazowych.
-Tak więc przegląd wszystkich rozwiązań sprawdza się jedynie dla bardzo
-prostych przestrzeni lamblialnych.  Oznacza to, że taka metoda ma
-niewielkie znaczenie praktyczne --- w~typowym przypadku z~życia trzeba
-rozważać przestrzenie lamblialne wymiaru rzędu 1000.
-
-W~literaturze można znaleźć kilka prób opracowania heurystyk dla
-problemu blabalizy (por. \cite{heu}).  Korzystając z~heurystyk daje
-się z~pewnym trudem dokonać blabalizy w~przestrzeni o~np.~500 fetorach
-bazowych.  Należy jednak pamiętać, że heurystyka nie daje gwarancji
-znalezienia najlepszego rozwiązania.  Fifak w~pracy~\cite{ff-sr}
-podaje, jak dla dowolnie zadanej funkcji oceniającej skonstruować
-dane, dla których rozwiązanie wygenerowane przez algorytm heurystyczny
-jest dowolnie odległe od rzeczywistego.
-
-\section{Metody wykorzystujące teorię Głombaskiego}
-
-Teoria Głombaskiego (zob.~\cite{grglo}) dostarcza eleganckiego
-narzędzia opisu przejścia do przestrzeni $\Lambda^{\nabla}$.
-Wystarczy mianowicie przedstawić fetory bazowe wyjściowej przestrzeni
-lamblialnej w~nieskończonej bazie tak zwanych wyższych aromatów.
-(Formalną definicję tego pojęcia przedstawię w~rozdziale poświęconym
-teorii Fifaka).  Podstawową cechą wyższych aromatów jest ulotność.  To
-zaś oznacza, że odpowiednio dobierając współczynniki przejścia do
-przestrzeni wyższych aromatów można zagwarantować dowolną z~góry
-zadaną dokładność przybliżonego rozwiązania problemu blabalizy.
-
-Oczywiście ze względu na nieskończony wymiar przestrzeni wyższych
-aromatów koszt poszukiwania współczynników blabalizy jest liniowy ze
-względu na wymiar wyjściowej przestrzeni lamblialnej.
-
-\section{Metody wykorzystujące własności fetorów $\sigma$}
-
-Najchętniej wykorzystywaną przestrzenią wyższych aromatów jest
-przestrzeń fetorów~$\sigma$.  Fetory $\sigma$ dają szczególnie prostą
-bazę podprzestrzeni widłowej.  Wiąże się to z~faktem, że w~tym przypadku
-fetory harmoniczne wyższych rzędów są pomijalne (rzędu $2^{-t^3}$,
-gdzie $t$ jest wymiarem wyjściowej przestrzeni lamblialnej).
-
-Niestety z~fetorami $\sigma$ wiąże się też przykre ograniczenie: można
-wykazać (zob.~\cite[s. 374]{ff-sr}), że dla dowolnie dobranej bazy
-w~podprzestrzeni widłowej istnieje ograniczenie dolne w~metryce sierpa
-na odległość rzutu dokładnego rozwiązania problemu blabalizy na
-podprzestrzeń widłową.  Ponieważ rzut ten stanowi najlepsze
-przybliżone rozwiązanie, jakie można osiągnąć nie naruszając aksjomatu
-reperkusatywności, więc istnieje pewien nieprzekraczalny próg
-dokładności dla blabalizy wykonanej przez przejście do przestrzeni
-fetorów $\sigma$.  Wartość retroinicjalną tego progu nazywa się
-\textit{reziduum blabicznym}.
-
-\chapter{Teoria fetorów $\sigma$-$\rho$}\label{r:fifak}
-
-Głównym odkryciem Fifaka jest, że fetor suprakowariantny może
-gryzmolizować dowolny ideał w~podprzestrzeni widłowej przestrzeni
-lamblialnej funkcji Rozkoszy.
-
-Udowodnienie tego faktu wymagało wykorzystania twierdzeń pochodzących
-z~kilku niezależnych teorii matematycznych (zob. na przykład:
-\cite{russell,spyrpt,JR,beaman,hopp,srinis}).  Jednym z~filarów
-dowodu jest teoria odwzorowań owalnych Leukocyta (zob.~\cite{leuk}).
-
-Znaczenie twierdzenia Fifaka dla problemu blabalizy polega na tym, że
-znając retroizotonalne współczynniki dla klatek Rozkoszy można
-przeprowadzić fetory bazowe na dwie nieskończone bazy fetorów $\sigma$
-w~przestrzeni $K_7$ i~fetorów $\rho$ w~odpowiedniej
-quasi-quasi-przestrzeni równoległej (zob.~\cite{hopp}).  Zasadnicza
-różnica w~stosunku do innych metod blabalizy polega na tym, że
-przedstawienie to jest dokładne.
-
-\chapter{Dokumentacja użytkowa i~opis implementacji}\label{r:impl}
-
-Program przygotowany dla systemu operacyjnego M\$ Windows uruchamia
-się energicznym dwumlaskiem na jego ikonce w~folderze
-\verb+\\FIDO\FOO\BLABA+.  Następnie kolistym ruchem ręki należy
-naprowadzić kursor na menu \texttt{Blabaliza} i~uaktywnić pozycję
-\texttt{Otwórz plik}.  Po wybraniu pliku i~zatwierdzeniu wyboru
-przyciskiem \texttt{OK} rozpocznie się proces blabalizy.  Wyniki
-zostaną zapisane w~pliku o~nazwie \texttt{99-1a.tx.43} w~bieżącym
-folderze.
-
-\chapter{Podsumowanie}
-
-W~pracy przedstawiono pierwszą efektywną implementację blabalizatora
-różnicowego.  Umiejętność wykonania blabalizy numerycznej dla danych
-,,z życia'' stanowi dla blabalii fetorycznej podobny przełom, jak dla
-innych dziedzin wiedzy stanowiło ogłoszenie teorii Mikołaja Kopernika
-i~Gryzybór Głombaskiego.  Z~pewnością w~rozpocznynającym się XXI wieku
-będziemy obserwować rozkwit blabalii fetorycznej.
-
-Trudno przewidzieć wszystkie nowe możliwości, ale te co bardziej
-oczywiste można wskazać już teraz.  Są to:
-\begin{itemize}
-\item degryzmolizacja wieńców telecentrycznych,
-\item realizacja zimnej reakcji lambliarnej,
-\item loty celulityczne,
-\item dokładne obliczenie wieku Wszechświata.
-\end{itemize}
-
-\section{Perspektywy wykorzystania w~przemyśle}
-
-Ze względu na znaczenie strategiczne wyników pracy ten punkt uległ
-utajnieniu.
-
-\appendix
-
-\chapter{Główna pętla programu zapisana w~języku T\=oFoo}
-
-\begin{verbatim}
-[[foo]{,}[[a3,(([(,),{[[]]}]),
-  [1; [{,13},[[[11],11],231]]].
-  [13;[!xz]].
-  [42;[{,x},[[2],{'a'},14]]].
-  [br;[XQ*10]].
- ), 2q, for, [1,]2, [..].[7]{x}],[(((,[[1{{123,},},;.112]],
-        else 42;
-   . 'b'.. '9', [[13141],{13414}], 11),
- [1; [[134,sigma],22]].
- [2; [[rho,-],11]].
- )[14].
- ), {1234}],]. [map [cc], 1, 22]. [rho x 1]. {22; [22]},
-       dd.
- [11; sigma].
-        ss.4.c.q.42.b.ll.ls.chmod.aux.rm.foo;
- [112.34; rho];
-        001110101010101010101010101010101111101001@
- [22%f4].
- cq. rep. else 7;
- ]. hlt
-\end{verbatim}
-
-\chapter{Przykładowe dane wejściowe algorytmu}
-
-\begin{center}
-  \begin{tabular}{rrr}
-    $\alpha$ & $\beta$ & $\gamma_7$ \\
-    901384 & 13784 & 1341\\
-    68746546 & 13498& 09165\\
-    918324719& 1789 & 1310 \\
-    9089 & 91032874& 1873 \\
-    1 & 9187 & 19032874193 \\
-    90143 & 01938 & 0193284 \\
-    309132 & $-1349$ & $-149089088$ \\
-    0202122 & 1234132 & 918324098 \\
-    11234 & $-109234$ & 1934 \\
-  \end{tabular}
-\end{center}
-
-\chapter{Przykładowe wyniki blabalizy
-    (ze~współczynnikami~$\sigma$-$\rho$)}
-
-\begin{center}
-  \begin{tabular}{lrrrr}
-    & Współczynniki \\
-    & Głombaskiego & $\rho$ & $\sigma$ & $\sigma$-$\rho$\\
-    $\gamma_{0}$ & 1,331 & 2,01 & 13,42 & 0,01 \\
-    $\gamma_{1}$ & 1,331 & 113,01 & 13,42 & 0,01 \\
-    $\gamma_{2}$ & 1,332 & 0,01 & 13,42 & 0,01 \\
-    $\gamma_{3}$ & 1,331 & 51,01 & 13,42 & 0,01 \\
-    $\gamma_{4}$ & 1,332 & 3165,01 & 13,42 & 0,01 \\
-    $\gamma_{5}$ & 1,331 & 1,01 & 13,42 & 0,01 \\
-    $\gamma_{6}$ & 1,330 & 0,01 & 13,42 & 0,01 \\
-    $\gamma_{7}$ & 1,331 & 16435,01 & 13,42 & 0,01 \\
-    $\gamma_{8}$ & 1,332 & 865336,01 & 13,42 & 0,01 \\
-    $\gamma_{9}$ & 1,331 & 34,01 & 13,42 & 0,01 \\
-    $\gamma_{10}$ & 1,332 & 7891432,01 & 13,42 & 0,01 \\
-    $\gamma_{11}$ & 1,331 & 8913,01 & 13,42 & 0,01 \\
-    $\gamma_{12}$ & 1,331 & 13,01 & 13,42 & 0,01 \\
-    $\gamma_{13}$ & 1,334 & 789,01 & 13,42 & 0,01 \\
-    $\gamma_{14}$ & 1,331 & 4897453,01 & 13,42 & 0,01 \\
-    $\gamma_{15}$ & 1,329 & 783591,01 & 13,42 & 0,01 \\
-  \end{tabular}
-\end{center}
-
-\begin{thebibliography}{99}
-\addcontentsline{toc}{chapter}{Bibliografia}
-
-\bibitem[Bea65]{beaman} Juliusz Beaman, \textit{Morbidity of the Jolly
-    function}, Mathematica Absurdica, 117 (1965) 338--9.
-
-\bibitem[Blar16]{eb1} Elizjusz Blarbarucki, \textit{O pewnych
-    aspektach pewnych aspektów}, Astrolog Polski, Zeszyt 16, Warszawa
-  1916.
-
-\bibitem[Fif00]{ffgg} Filigran Fifak, Gizbert Gryzogrzechotalski,
-  \textit{O blabalii fetorycznej}, Materiały Konferencji Euroblabal
-  2000.
-
-\bibitem[Fif01]{ff-sr} Filigran Fifak, \textit{O fetorach
-    $\sigma$-$\rho$}, Acta Fetorica, 2001.
-
-\bibitem[Głomb04]{grglo} Gryzybór Głombaski, \textit{Parazytonikacja
-    blabiczna fetorów --- nowa teoria wszystkiego}, Warszawa 1904.
-
-\bibitem[Hopp96]{hopp} Claude Hopper, \textit{On some $\Pi$-hedral
-    surfaces in quasi-quasi space}, Omnius University Press, 1996.
-
-\bibitem[Leuk00]{leuk} Lechoslav Leukocyt, \textit{Oval mappings ab ovo},
-  Materiały Białostockiej Konferencji Hodowców Drobiu, 2000.
-
-\bibitem[Rozk93]{JR} Josip A.~Rozkosza, \textit{O pewnych własnościach
-    pewnych funkcji}, Północnopomorski Dziennik Matematyczny 63491
-  (1993).
-
-\bibitem[Spy59]{spyrpt} Mrowclaw Spyrpt, \textit{A matrix is a matrix
-    is a matrix}, Mat. Zburp., 91 (1959) 28--35.
-
-\bibitem[Sri64]{srinis} Rajagopalachari Sriniswamiramanathan,
-  \textit{Some expansions on the Flausgloten Theorem on locally
-    congested lutches}, J. Math.  Soc., North Bombay, 13 (1964) 72--6.
-
-\bibitem[Whi25]{russell} Alfred N. Whitehead, Bertrand Russell,
-  \textit{Principia Mathematica}, Cambridge University Press, 1925.
-
-\bibitem[Zen69]{heu} Zenon Zenon, \textit{Użyteczne heurystyki
-    w~blabalizie}, Młody Technik, nr~11, 1969.
-
-\end{thebibliography}
+\bibliography{references}
 
 \end{document}
 
