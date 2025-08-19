@@ -52,7 +52,7 @@
 \newcommand{\todo}[1]{\textcolor{black}{#1}}
 \newcommand{\note}[1]{\textcolor{orange}{#1}}
 \newcommand{\method}[1]{EquiDiff}  % Equivariant Diffusion Sampling
-\newcommand{\invariantimages}[1]{Invariant Images}  % Invariant Images
+\newcommand{\invariantimages}[1]{Invariants}  % Invariant Images
 % DIVA (Diverse Invariant Visual Analysis)
 % GUIDE (Generative Understanding of Invariant Domains via Equivariance)
 
@@ -108,7 +108,7 @@
 % (podać tytuł/stopień imię i nazwisko opiekuna
 % Instytut
 % ew. Wydział ew. Uczelnia (jeżeli nie MIM UW))
-\opiekun{prof. Przemysław Biecek\\
+\opiekun{prof. dr hab. inż. Przemysław Biecek\\
   Wydział Matematyki Informatyki i Mechaniki\\
   }
 
@@ -145,7 +145,7 @@
 
 %tu idzie streszczenie na strone poczatkowa
 \begin{abstract}
-Understanding the decision-making process of image classifiers is an active area of research in machine learning. Current industry-standard methods focus on finding human-interpretable concepts or features that influence predictions in known data samples. However, we argue that this approach is limited in its ability to provide a comprehensive understanding of model behavior due to vast unexplored regions of the data manifold which can potentially lead to the same predictions. This work is a continuation of pioneering work on Generative Explainable AI (XAI) \cite{sobieski2024rethinkingvisualcounterfactualexplanations} published at ICLR 2025 and introduces a novel framework of \invariantimages{} - sets of images that yield identical predictions under a given objective function, thereby establishing an equivalence relation. Our method \method{} allows for sampling meaningful and diverse high quality realistic examples from these invariant sets and as a result opens new possibilities for evaluating existing explainability methods on unknown data - simulating the real world.
+Understanding the decision-making process of deep neural networks is an active area of research in machine learning. Current state of the art methods focus on finding human-interpretable concepts or features that influence predictions in known data samples. However, we argue that this approach is limited in its ability to provide a comprehensive understanding of model behavior due to vast unexplored regions of the data manifold, not present in investigated datasets, which can potentially lead to the same predictions. This work is a continuation of pioneering work on Generative Explainable AI (XAI) \cite{sobieski2024rethinkingvisualcounterfactualexplanations} published at International Conference on Learning Representations 2025 and introduces a novel framework of \invariantimages{} - sets of data points that yield identical predictions under a given model, thereby establishing an equivalence relation. Our method \method{} allows for sampling meaningful and diverse high quality realistic examples from these invariant sets and as a result opens new possibilities for  evaluating existing explainability methods on unknown data - simulating the real world, and fully preventing training data leaks by generating synthetic samples. 
 \end{abstract}
 
 \tableofcontents
@@ -169,16 +169,16 @@ This question is not merely academic. Understanding the full scope of inputs tha
 
 \item \textbf{Fairness Evaluation}: Understanding what variations preserve predictions helps assess whether models make decisions based on relevant features rather than protected attributes.
 
-\item \textbf{Generalization Understanding}: The structure of invariant sets provides insights into how models generalize beyond their training distribution.
+\item \textbf{Generalization Understanding}: The structure of invariant sets provides insight into how models generalize beyond their training distribution.
 \end{enumerate}
 
 \section{Our Approach: Generative Explainable AI}
 
-This thesis introduces a paradigm shift from traditional interpolative XAI methods to a generative approach. Instead of analyzing existing data points, we propose to synthesize new, meaningful examples that preserve model predictions, thereby exploring the \textit{Invariant Set} -- the complete collection of inputs that yield identical outputs under a given objective function.
+This thesis introduces a paradigm shift from traditional interpolative XAI methods to a generative approach. Instead of analyzing existing data points, we propose synthesizing new, meaningful examples that preserve model predictions, thereby exploring the \textit{Invariant Set} -- the complete collection of inputs that yield identical outputs under a given objective function.
 
 Our method, \method{} (Equivariant Diffusion Sampling), combines score-based generative models with classifier guidance to sample high-quality, diverse images from these invariant sets. By leveraging the powerful generative capabilities of diffusion models, we can explore regions of the input space that may never have been encountered during training, providing a more comprehensive understanding of model behavior.
 
-Figure~\ref{fig:1_teaser} illustrates the conceptual distinction between our approach and current XAI methods. While traditional methods focus on explaining decisions within known data boundaries, generative XAI explores the broader space of possible inputs that lead to the same predictions.
+Figure~\ref{fig:1_teaser} illustrates the conceptual distinction between our approach and current XAI methods. While traditional methods focus on explaining decisions within known data boundaries, generative XAI does not have this limitation and can explore the broader space of possible inputs that lead to the same predictions.
 
 \begin{figure}[h]
 \centering
@@ -192,7 +192,7 @@ Figure~\ref{fig:1_teaser} illustrates the conceptual distinction between our app
 This thesis makes the following key contributions to the field of explainable AI:
 
 \begin{enumerate}
-\item \textbf{Theoretical Framework}: We provide a formal mathematical definition of invariant sets for neural network explanation and establish their properties as equivalence relations.
+\item \textbf{Theoretical Framework}: We provide a formal mathematical definition of \invariantimages{} and establish their properties as equivalence relations.
 
 \item \textbf{Algorithmic Innovation}: We develop \method{}, a practical algorithm that combines score-based diffusion models with guided sampling to generate high-quality examples from invariant sets.
 
@@ -217,7 +217,7 @@ The field of explainable AI has evolved rapidly in response to the growing compl
 
 \subsection{Attribution Methods}
 
-Attribution methods aim to identify which input features are most important for a model's prediction. Gradient-based methods like Integrated Gradients \cite{sundararajan2017axiomaticattributiondeepnetworks} and GradCAM \cite{8237336} compute the gradient of the output with respect to input features to determine importance scores. While computationally efficient, these methods are limited to local explanations around specific data points and can be sensitive to model architecture and input preprocessing.
+Attribution methods aim to identify which input features are most important for a model's prediction in a form of a heatmap. Gradient-based methods like Integrated Gradients \cite{sundararajan2017axiomaticattributiondeepnetworks} and GradCAM \cite{8237336} compute the gradient of the output with respect to input features to determine importance scores. While computationally efficient, these methods are limited to local explanations around specific data points and can be sensitive to model architecture and input preprocessing.
 
 Perturbation-based methods such as LIME \cite{ribeiro2016whyitrustyou} and SHAP \cite{lundberg2017unifiedapproachinterpretingmodel} evaluate feature importance by measuring how predictions change when features are masked or altered. These methods provide more model-agnostic explanations but are computationally expensive and may not capture complex feature interactions.
 
@@ -229,9 +229,9 @@ More recent work has focused on discovering concepts automatically without human
 
 \subsection{Counterfactual Explanations}
 
-Counterfactual explanations answer the question "What would need to change for the model to make a different prediction?" This paradigm has gained popularity due to its intuitive nature and practical utility. Recent work by \cite{sobieski2024rethinkingvisualcounterfactualexplanations} has pioneered the use of generative models for creating visual counterfactual explanations, directly inspiring our approach.
+Counterfactual explanations answer the question "What would need to change for the model to make a different prediction?" This paradigm has gained popularity due to its intuitive nature and practical utility. Although earlier work has explored generative models for visual counterfactual explanations, \cite{sobieski2024rethinkingvisualcounterfactualexplanations} advanced this direction in a way that directly inspired our approach. Our method is, to our knowledge, the first to combine high-quality results with almost real-time performance.
 
-However, counterfactual methods typically focus on finding minimal changes that flip predictions, which is fundamentally different from our goal of finding diverse examples that preserve predictions.
+In counterfactual methods, the objective is generally defined as finding the smallest possible changes to an input that alter the model’s decision—for example, modifying a few pixels in an image so that the predicted class changes. In contrast, our goal is to generate diverse examples that preserve the original prediction.
 
 \section{Score-Based Generative Models}\label{sec:sgm_background}
 
@@ -239,7 +239,7 @@ Score-based generative models (SGMs) have emerged as a powerful framework for hi
 
 \subsection{Mathematical Foundation}
 
-The core idea behind SGMs is to transform samples from a complex data distribution $p_0$ (e.g., natural images) to a simple noise distribution $p_1$ (typically Gaussian) through a forward diffusion process, then learn to reverse this transformation. The forward SDE is given by:
+The core idea behind SGMs is to transform samples from a complex data distribution $p_0$ (e.g. natural images) to a simple noise distribution $p_1$ (typically Gaussian) through a forward diffusion process and then learn to reverse this transformation. The forward SDE is given by:
 
 \begin{equation}
 \diff \mathbf{x}_t = \mathbf{f}(\mathbf{x}_t, t) \diff t + g(t) \diff \mathbf{w}_t
@@ -255,11 +255,11 @@ The corresponding reverse SDE, which enables generation, is:
 \label{eq:reverse_sde}
 \end{equation}
 
-The key term $\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)$ is the score function, which must be learned by a neural network $\mathbf{s}_{\boldsymbol{\theta}}(\mathbf{x}_t, t)$.
+The key term $\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}t)$ is the score function, which must be learned by a neural network $\mathbf{s}{\boldsymbol{\theta}}(\mathbf{x}_t, t)$, since it cannot be computed analytically without access to the final, fully denoised image.
 
 \subsection{Training and Sampling}
 
-Score networks are typically trained using denoising score matching \cite{6795935}:
+Score networks are typically trained using denoising score matching \cite{6795935, song2020generativemodelingestimatinggradients}:
 
 \begin{equation}
 \mathcal{L}(\boldsymbol{\theta}) = \mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}} \left[ \lambda(t) \|\mathbf{s}_{\boldsymbol{\theta}}(\mathbf{x}_t, t) - \boldsymbol{\epsilon}\|_2^2 \right]
@@ -295,11 +295,11 @@ where $s$ is the guidance scale that controls the trade-off between sample quali
 While effective for class-conditional generation, standard classifier guidance has several limitations for our application:
 
 \begin{enumerate}
-\item \textbf{Limited Optimization Steps}: The guidance is applied only during a fixed number of diffusion steps, which may be insufficient for precise conditioning.
+\item \textbf{Limited Optimization Steps}: Guidance is applied only at discrete points along the denoising trajectory, due to the fixed number of diffusion steps, which can constrain the precision of conditioning.
 
-\item \textbf{Latent Space Challenges}: Most state-of-the-art diffusion models operate in latent space, requiring careful handling of the conditioning signal.
+\item \textbf{Latent Space Considerations}: Many state-of-the-art diffusion models operate in latent space, requiring careful alignment of the conditioning signal with the model’s latent representation.
 
-\item \textbf{Objective Function Flexibility}: Standard methods are designed for classification tasks and may not easily extend to arbitrary objective functions.
+\item \textbf{Objective Function Alignment}: In its standard form, classifier guidance is tailored for classification objectives (predicting $p(y \mid x)$). While the conditioning variable $y$ can, in principle, represent a wide range of targets beyond class labels, adapting it to arbitrary objective functions may require additional formulation effort.
 \end{enumerate}
 
 These limitations motivate our approach, which we detail in Chapter~\ref{r:method}.
@@ -313,13 +313,13 @@ Recent work has explored the use of diffusion models as priors for solving inver
 \label{eq:inverse_problem}
 \end{equation}
 
-where $\mathcal{A}$ is a (possibly nonlinear) forward operator, $\mathbf{x}$ is the unknown signal, $\mathbf{y}$ is the observed measurement, and $\boldsymbol{\epsilon}$ is noise.
+where $\mathcal{A}$ is a (possibly nonlinear) forward operator, $\mathbf{x}$ is the unknown signal, $\mathbf{y}$ is the observed measurement, and $\boldsymbol{\epsilon}$ is an additive noise term, which may follow different distributions (e.g., Gaussian, Poisson) and can exhibit nontrivial covariance structures.
 
-\cite{chung2024diffusionposteriorsamplinggeneral} showed that diffusion models can handle nonlinear inverse problems by incorporating the measurement likelihood into the reverse SDE. This work is particularly relevant to our approach, as neural network predictions can be viewed as nonlinear measurements of the input image.
+\cite{chung2024diffusionposteriorsamplinggeneral} showed that diffusion models can address nonlinear inverse problems for arbitrary differentiable forward systems by incorporating the measurement likelihood into the reverse SDE. Their framework accommodates various noise models, including Gaussian and Poisson. This is particularly relevant to our approach, as neural network predictions can be interpreted as nonlinear measurements of the input image.
 
 \subsection{Diverse Posterior Sampling}
 
-More recently, \cite{cohen2024posteriorsamplingmeaningfuldiversity} extended inverse problem solvers to generate diverse solutions rather than a single best estimate. This paradigm shift from point estimation to posterior sampling aligns closely with our goal of generating diverse examples from invariant sets.
+More recently, \cite{cohen2024posteriorsamplingmeaningfuldiversity} extended inverse problem solvers to generate diverse solutions rather than a single best estimate. This paradigm shift from point estimation to posterior sampling aligns closely with our goal of generating new data samples.
 
 \section{Activation Maximization and Feature Visualization}
 
@@ -332,16 +332,16 @@ Activation maximization techniques attempt to synthesize inputs that maximally a
 
 where $\mathcal{R}(\mathbf{x})$ is a regularization term to encourage natural-looking images.
 
-However, activation maximization methods often produce unrealistic images with high-frequency artifacts that are imperceptible to humans but strongly activate neurons. Various regularization techniques have been proposed, including total variation penalties \cite{mahendran2014understandingdeepimagerepresentations} and frequency domain constraints \cite{olah2017feature}.
+However, activation maximization methods often produce unrealistic images accompanied by high-frequency artifacts that are imperceptible to humans yet strongly activate neurons \cite{shinkle2025visualizingcontrollingcorticalresponses, nanfack2023adversarialattacksinterpretationneuron, zhu2025representationunderstandingactivationmaximization}. To address this, various regularization techniques have been proposed, including total variation penalties, which encourage smoother and more coherent outputs \cite{mahendran2014understandingdeepimagerepresentations}, and frequency domain constraints that reduce high-frequency noise and improve interpretability \cite{olah2017feature}.
 
 \subsection{Limitations and Relationship to Our Work}
 
-While activation maximization shares the goal of understanding model behavior through synthetic inputs, it differs fundamentally from our approach:
+Although activation maximization shares the goal of understanding model behavior through synthetic inputs, it differs fundamentally from our approach.
 
 \begin{enumerate}
-\item \textbf{Single Solution vs. Diverse Sets}: Activation maximization typically finds one optimal input, while we aim to sample from the entire invariant set.
+\item \textbf{Single Solution vs. Diverse Sets}: Activation maximization typically finds one optimal input, while we aim to generate a set of new data points.
 
-\item \textbf{Maximum Activation vs. Preserved Predictions}: Activation maximization seeks to maximize responses, while we preserve specific prediction values.
+\item \textbf{Maximum Activation vs. Preserved Predictions}: Activation maximization seeks to maximize responses while we preserve specific prediction values.
 
 \item \textbf{Quality Issues}: Traditional activation maximization often produces unrealistic images, while our diffusion-based approach leverages strong visual priors.
 \end{enumerate}
@@ -360,16 +360,17 @@ As generative models become increasingly sophisticated, detecting synthetic imag
 
 Recent advances in synthetic image detection \cite{zhang2019detectingsimulatingartifactsgan, wang2023dirediffusiongeneratedimagedetection, zhang2023diffusion} have achieved near-perfect accuracy on images generated by GANs and diffusion models by analyzing frequency domain artifacts.
 
-While we do not aim to fool detection methods (we acknowledge our images are synthetic), we incorporate insights from this literature to ensure our generated images encode meaningful signal in perceptually relevant frequency bands rather than imperceptible high-frequency artifacts.
+While our goal is not to evade detection methods, we acknowledge that our images are synthetic. Drawing on insights from this literature, we aim for the Fourier spectrum of our generated images to match that of real images, ensuring that model predictions are not driven by imperceptible frequency artifacts but by signal patterns consistent with natural image statistics.
 
 \section{Gap in Current Literature}
 
-Despite significant advances in explainable AI, a fundamental gap remains: current methods primarily analyze known training data and model behavior on observed inputs. This leaves vast regions of the input manifold unexplored, potentially missing important insights about model behavior.
+Despite significant advances in XAI, a fundamental gap remains: current methods primarily analyze known training data and model behavior on observed inputs. This leaves vast regions of the input manifold unexplored, potentially missing important insights about model behavior.
 
-Our work addresses this gap by introducing a principled framework for exploring the space of alternative inputs that yield identical predictions. By leveraging powerful generative models, we can sample from regions of the input space that may never have been encountered during training, providing a more comprehensive understanding of model behavior.
+Our work addresses this gap by introducing a principled framework for exploring the space of alternative inputs that yield identical predictions. By leveraging powerful generative models, we sample from regions of the input space that were observed during training but represent continuous interpolations and variations of the training data, providing a more comprehensive understanding of model behavior within the learned data manifold.
 \chapter{Method}\label{r:method}
 
-This chapter presents our theoretical framework and algorithmic approach for generating invariant sets. We begin with formal definitions, establish our theoretical foundation, detail our algorithm, and conclude with implementation specifics and quality assurance measures.
+This chapter presents our theoretical framework and algorithmic approach for generating \invariantimages{}. We begin with formal definitions that relate our concept to classical level sets from differential topology \cite{lee2013smooth, milnor1965topology, fort2017gaussian
+}, establish our theoretical foundation, detail our algorithm, and conclude with implementation specifics and quality assurance measures.
 
 \begin{figure}[h]
 \centering
@@ -377,36 +378,39 @@ This chapter presents our theoretical framework and algorithmic approach for gen
 \caption{Demonstration of the Invariant Framework on a 2D Concentric Circles Dataset.
 (a) Training dataset with 1,500 samples classified by their position relative to a unit circle (dashed line). Blue points represent the outer class, pink points the inner class.
 (b) Learned decision boundary and prediction probability heatmap from a 3-layer MLP (test accuracy: 0.983). The black contour shows the 0.5 decision boundary.
-(c-e) Invariant sets for three query points (black stars) with prediction values p. Orange points represent all input locations that yield identical predictions under the trained model, demonstrating the equivalence relation established by our framework. The invariant sets approximate level curves of the learned decision function, revealing the geometric structure of the model's decision space.}
+(c-e) Invariant sets for three query points (black stars) with prediction values p. Orange points represent all input locations that yield identical predictions under the trained model, demonstrating the equivalence relation established by the model's output. The invariant sets approximate level curves of the learned decision function, revealing the geometric structure of the model's decision space.}
 \label{fig:teaser}
 \end{figure}
 
 \section{Problem Formulation}
-
-We formulate the problem of finding invariant sets (IS) as discovering members of an equivalence relation. Given an objective function $\mathcal{L}:\mathbb{R}^n \rightarrow \mathbb{R}^m$ and a query point $\mathbf{x^*}$, we define the invariant set as:
-
+We formulate the problem of finding invariant sets (IS) as discovering members of an equivalence relation. Given a neural network with parameters $\boldsymbol{\theta}$ and objective function $\mathcal{L}_{\boldsymbol{\theta}}:\mathbb{R}^n \rightarrow \mathbb{R}^m$, and a query point $\mathbf{x^*}$, we define the invariant set as:
 \begin{equation}
-  \mathbf{IS}(\mathbf{x^*}) = \{ \mathbf{x} \in \mathbb{R}^n : \mathcal{L}(\mathbf{x}) = \mathcal{L}(\mathbf{x^*}) \}
+  \mathbf{IS}(\mathbf{x^*}) = \{ \mathbf{x} \in \mathbb{R}^n : \mathcal{L}_{\boldsymbol{\theta}}(\mathbf{x}) = \mathcal{L}_{\boldsymbol{\theta}}(\mathbf{x^*}) \}
   \label{eq:is}
 \end{equation}
+We use the notation $\mathbf{x^*} \sim_{\mathcal{L}_{\boldsymbol{\theta}}} \mathbf{x}$ to denote that two elements $\mathbf{x^*}$ and $\mathbf{x}$ belong to the same invariant set under the equivalence relation defined by $\mathcal{L}_{\boldsymbol{\theta}}$.
 
-We use the notation $\mathbf{x^*} \sim_{\mathcal{L}} \mathbf{x}$ to denote that two elements $\mathbf{x^*}$ and $\mathbf{x}$ belong to the same invariant set under the equivalence relation defined by $\mathcal{L}$.
+The objective function $\mathcal{L}_{\boldsymbol{\theta}}$ can represent various neural network components: a single neuron's activation, class logits for one or multiple classes, or any differentiable function for which gradients can be computed. While adversarial examples can be viewed as specific perturbations that may belong to invariant sets under certain conditions \cite{szegedy2014intriguingpropertiesneuralnetworks}, our goal is fundamentally different: we seek to sample from the intersection of the invariant set with the natural data manifold, ensuring realism by construction.
 
-The objective function $\mathcal{L}$ can represent various neural network components: a single neuron's activation, class logits for one or multiple classes, or any differentiable function for which gradients can be computed. While established methods exist for generating adversarial examples directly from $\mathbf{x^*}$ \cite{szegedy2014intriguingpropertiesneuralnetworks}, our goal is to sample meaningful and diverse examples from the entire invariant set.
+To achieve this, we utilize a trained diffusion model, specifically LightningDIT \cite{yao2025vavae} \cite{yao2024fasterdit}, which excels at generating high-quality images while maintaining the mathematical constraints of invariant set membership. The diversity of examples emerges naturally from exploring different regions of this manifold intersection.
 
-To achieve this diversity and realism, we utilize a trained diffusion model, specifically LightningDIT \cite{yao2025vavae} \cite{yao2024fasterdit}, which excels at generating high-quality images while maintaining the mathematical constraints of invariant set membership.
 
-\section{Guided Infinite Optimization with Latent Diffusion Models}
+\section{Guided Iterative Optimization with Latent Diffusion Models}
 
-Our algorithm integrates signals from the objective function $\mathcal{L}:\mathbb{R}^{W \times H} \rightarrow \mathbb{R}^m$ to conditionally synthesize images from invariant sets. There are two primary approaches for conditioning generation using $\mathcal{L}$.
+Our algorithm integrates signals from the neural network function $f_{\boldsymbol{\theta}}:\mathbb{R}^{W \times H} \rightarrow \mathbb{R}^m$ through a scalar loss function $\ell: \mathbb{R}^m \times \mathbb{R}^m \rightarrow \mathbb{R}$ to conditionally synthesize images from invariant sets. Given a target output $\mathbf{y^*} = f_{\boldsymbol{\theta}}(\mathbf{x^*})$, we define our objective as:
+\begin{equation}
+\mathcal{L}(\mathbf{x}) = \ell(f_{\boldsymbol{\theta}}(\mathbf{x}), \mathbf{y^*})
+\end{equation}
+where $\ell$ is typically the $\ell_2$ norm or another appropriate distance metric. This formulation enables gradient computation for optimization while maintaining the invariant set constraint $\mathcal{L}(\mathbf{x}) = 0$. There are two primary approaches for conditioning generation using this objective.
 
 \subsection{Classifier Guidance Limitations}
 
 Classifier Guidance (CG) \cite{dhariwal2021diffusionmodelsbeatgans} offers a simple, computationally efficient method for trading diversity for fidelity using gradients from the objective function at each denoising step. However, we identified two significant limitations:
 
 \begin{itemize}
-  \item \textbf{Limited optimization horizon}: CG constrains optimization to the number of diffusion steps, imposing additional restrictions on the process. Our empirical analysis demonstrates that this constraint is insufficient for achieving optimal results in invariant set generation.
-  \item \textbf{Latent space complications}: Most state-of-the-art diffusion models \cite{paperswithcode_imagenet} are trained using the Latent Diffusion Model (LDM) approach. When conditioning generation on class labels rather than specific neuron activations, one must provide noisy intermediate encoded images $\mathcal{D}(\mathbf{x}_t)$ to the classifier. This requirement can be addressed by either training classifiers for each timestep $t$ or using noisy estimates of $x_0(t)$, but the additional decoder step amplifies error propagation.
+  \item \textbf{Restrictive optimization horizon}: CG typically constrains optimization to a single forward pass through the diffusion steps, which can be too restrictive for achieving optimal results in invariant set generation. While iterative refinement through multiple passes is possible, it significantly increases computational overhead.
+  
+  \item \textbf{Latent space complications}: Modern diffusion models often employ the Latent Diffusion Model (LDM) approach \cite{rombach2022highresolutionimagesynthesislatent}, which operates in a compressed latent space rather than directly on pixel values. This architectural choice introduces additional complexity when conditioning on neural network outputs: the classifier must evaluate encoded representations $\mathcal{E}(\mathbf{x}_t)$ at intermediate diffusion timesteps rather than natural images. This mismatch between the diffusion model's latent space and the classifier's expected input domain requires either training timestep-specific classifiers or using approximate reconstructions $\hat{\mathbf{x}}_0(t)$, both of which introduce additional sources of error.
 \end{itemize}
 
 \subsection{Infinite Optimization Approach}
@@ -415,7 +419,7 @@ Given these limitations, we adopt an \textit{Infinite Optimization} strategy, sp
 
 \section{Quality and Realism Assurance}\label{method:quality_realism}
 
-Our approach ensures that generated images maintain high quality and realism through several mechanisms. We build upon industry-standard frameworks for synthetic image detection and guarantee that generated samples do not contain adversarial noise hidden in high-frequency patterns.
+Our approach ensures that generated images maintain high quality and realism through several mechanisms. We build upon state-of-the-art frameworks for synthetic image detection and leverage the inherent properties of diffusion models, which naturally generate samples from the learned data distribution. Unlike optimization-based adversarial methods that may introduce imperceptible high-frequency artifacts, our diffusion-based approach constrains generation to the natural image manifold, ensuring that invariant set samples remain visually coherent and realistic.
 
 \subsection{Frequency Domain Optimization}
 
@@ -431,6 +435,27 @@ This frequency-aware approach ensures that:
 The combination of infinite optimization with frequency domain constraints allows our method to generate diverse, high-quality samples from invariant sets while preserving both mathematical rigor and visual realism.
 
 \chapter{Experiments}\label{r:experiments}
+
+Following recent work on monosemanticity and mechanistic understanding, we base our qualitative evaluation on 
+
+% Invariant neuron optimization, we target some neuron, for example taken from semantic leans \cite dreyer2025mechanisticunderstandingvalidationlarge  e.g. this one 1656a: 0.09r.:94.5% "Black and white stripes" where "alignment a to an expected concept (label below concept examples), we provide the highest relevance scores r on the test set of the class." and show that we can generate images that also activate it but look completly not like zebra (here comes some image). Here it is important to get the hypothesis right: " repeat experiment for layer3.2.conv1: [179] with a proper (matched to one of the hypothesized semantics) image / choose simpler neuron with proper image, e.g., layer3.2.conv1: [1656] # Layer 3, "zebra", high relevance 94.5%"
+
+% We do the same for sae from joseph2025prismaopensourcetoolkit and show that some concepts are active on images that look differently
+
+% and of cource we do the same just for res net classifier probability / logit output
+
+
+% this one is maybe: for SAE: generate images that i) maximize reconstruction error, ii) are semifactuals wrt to the original image implement new optimization scheme with penalty for trajectory closeness and starting from the true image latent
+
+% some additional nice looking metric -  radial power spectrum
+% It visualizes the average magnitude of frequency components in an image's 2D Fourier Transform as a function of radial distance from the center (zero frequency). It shows how power is distributed across frequencies, with low frequencies near the center and high frequencies at the edges. In the provided code, the plot compares real and synthetic images:
+
+% X-axis: Radial distance (frequency bins from the center).
+% Y-axis: Average magnitude of frequency components.
+
+% As loss
+% We can also use this as a loss function but it needs to be differentiable.
+% There is implementation in src/loss/radial_spectrum.py but we dont use it
 
 \chapter{Applications}\label{r:applications}
 
