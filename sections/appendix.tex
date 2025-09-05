@@ -1,0 +1,236 @@
+\appendix
+
+\section{Infinite Optimization Algorithm}\label{appendix:infinite_optimization}
+This appendix provides the detailed algorithmic specification for proposed invariant set generation method, adapted from the infinite optimization approach. Unlike the original text-conditioned diffusion guidance, the algorithm is specifically designed for generating images that belong to the same invariant set as a given query point.
+
+\begin{algorithm}[H]
+\caption{Invariant Set Generation via Infinite Optimization}
+\label{alg:invariant_generation}
+\begin{algorithmic}[1]
+\Require Loss function $\mathcal{L}$, Query point $\mathbf{x^*}$, Target value $\mathcal{L}(\mathbf{x^*})$, Step budget $B$, Loss threshold $\tau$, Learning rate $\eta$, Step size $\lambda$, Low-pass filter $\mathcal{F}$
+\Ensure Generated sample $x$ such that $\mathcal{L}(x) \approx \mathcal{L}(\mathbf{x^*})$
+
+\State $z_T \sim \mathcal{N}(0, I)$ \Comment{Draw starting latent}
+\State $target\_value = \mathcal{L}(\mathbf{x^*})$ \Comment{Store target invariant value}
+
+\For{$t = 1, \ldots, T$} \Comment{Initialize time step-dependent variables}
+    \State $C_t = \emptyset$ \Comment{No conditioning (unconditional generation)}
+\EndFor
+
+\State $optim = \text{SGD}(z_T, \text{lr}=\eta)$ \Comment{Define the optimizer}
+
+\State $step\_count = 0$ \Comment{Initialize step counter}
+\While{$step\_count < B$} \Comment{Optimization loop with budget}
+    \State $z = z_T$ \Comment{Reset to starting latent}
+    
+    \For{$t = T, \ldots, 1$} \Comment{Denoising loop}
+        \State \textbf{with} gradient\_checkpointing():
+        \State \quad $z = \text{LightningDiT\_step}(z, t)$ \Comment{Diffusion update according to LightningDiT}
+    \EndFor
+    
+    \State $x = \mathcal{D}(z)$ \Comment{Decode final latent using VAE decoder}
+    \State $current\_value = \mathcal{L}(x)$ \Comment{Calculate unfiltered objective value}
+    \State $x_{filtered} = \mathcal{F}(x)$ \Comment{Apply low-pass filter}
+    \State $current\_value_{filtered} = \mathcal{L}(x_{filtered})$ \Comment{Calculate filtered objective value}
+    
+    \State $loss_1 = \|current\_value - target\_value\|^2$ \Comment{Unfiltered invariant set loss}
+    \State $loss_2 = \|current\_value_{filtered} - target\_value\|^2$ \Comment{Filtered invariant set loss}
+    \State $total\_loss = \lambda \cdot (loss_1 + loss_2)$ \Comment{Combined loss with step size}
+    
+    \If{$total\_loss < \tau$} \Comment{Check convergence threshold}
+        \State \textbf{break} \Comment{Early termination}
+    \EndIf
+    
+    \State $total\_loss$.backward() \Comment{Calculate gradients w.r.t. $z_T$}
+    
+    \State $optim$.step() \Comment{Update starting latent}
+    \State $optim$.zero\_grad() \Comment{Clear gradients}
+    \State $step\_count = step\_count + 1$ \Comment{Increment step counter}
+\EndWhile
+
+\State \Return $z_T$, $x$ \Comment{Return optimized latent and final image}
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Key Differences from Original Algorithm}
+
+The adaptation introduces several important modifications to suit invariant set generation:
+
+\begin{itemize}
+    \item \textbf{Unconditional Generation}: Unlike the original text-conditioned approach, we use unconditional diffusion models ($C_t = \emptyset$) and rely entirely on the optimization process to guide generation toward the target invariant set.
+    
+    \item \textbf{Invariant Set Objective}: Instead of optimizing for text-image alignment, we minimize the $L_2$ distance between $\mathcal{L}(x)$ and the target value $\mathcal{L}(\mathbf{x^*})$, ensuring membership in the same invariant set.
+    
+    \item \textbf{Frequency Domain Filtering}: We incorporate a low-pass filter $\mathcal{F}$ before computing the objective function to ensure that invariant set membership is achieved through perceptually meaningful variations rather than high-frequency adversarial noise.
+    
+    \item \textbf{LightningDiT Integration}: The diffusion denoising process follows the LightningDiT sampling procedure, which may use different update rules than standard DDIM depending on the specific implementation and training configuration.
+\end{itemize}
+
+\subsection{Computational Considerations}
+
+The infinite optimization approach requires careful management of computational resources:
+
+\begin{itemize}
+    \item \textbf{Gradient Checkpointing}: We employ gradient checkpointing during the denoising loop to reduce memory consumption while maintaining gradient flow through the entire diffusion process.
+    
+    \item \textbf{Optimizer Selection}: Based on empirical evaluation, SGD demonstrates superior convergence properties for invariant set generation compared to adaptive methods like Adam.
+    
+    \item \textbf{Step Budget Management}: The algorithm balances computational cost with solution quality through the step budget $B$ and threshold $\tau$ parameters, enabling early termination for efficient optimization landscapes.
+    
+    \item \textbf{Dual Loss Computation}: Computing both filtered and unfiltered objective values provides robustness against adversarial solutions while maintaining semantic coherence in generated samples.
+\end{itemize}
+
+\section{Level Set Theory Foundation}\label{appendix:level_sets}
+
+Proposed \framework{} are mathematically equivalent to level sets from classical analysis. This connection provides theoretical grounding for the generative approach.
+
+\subsection{Basic Definition}
+
+For a function $f: \mathbb{R}^n \rightarrow \mathbb{R}$, the level set at value $c$ is:
+\begin{equation}
+L_c = \{x \in \mathbb{R}^n : f(x) = c\}
+\end{equation}
+
+This is exactly what we compute: all inputs $x$ that produce the same output value $c$.
+
+\subsection{Neural Network Case}
+
+For neural networks outputting vectors $\mathcal{L}_{\boldsymbol{\theta}}: \mathbb{R}^n \rightarrow \mathbb{R}^m$, proposed invariant sets are intersections of multiple level sets:
+\begin{equation}
+\mathbf{IS}(\mathbf{x^*}) = \bigcap_{i=1}^m \{x : [\mathcal{L}_{\boldsymbol{\theta}}(x)]_i = [\mathcal{L}_{\boldsymbol{\theta}}(\mathbf{x^*})]_i\}
+\end{equation}
+
+Each output dimension defines one level set; we find points lying on all of them simultaneously.
+
+\subsection{Why This Works}
+
+Level sets typically form smooth geometric surfaces when the function gradients are non-zero. Proposed diffusion model samples from these surfaces while staying within the natural image manifold. This geometric perspective explains why we can generate diverse yet valid samples from invariant sets.
+
+\section{Implementation Details}\label{appendix:implementation}
+
+This section provides the specific implementation parameters used throughout the experiments.
+
+\subsection{Optimization Configuration}
+
+Based on empirical evaluation, the following parameters were selected:
+\begin{itemize}
+\item \textbf{Optimizer}: SGD (most stable convergence)
+\item \textbf{Learning Rate}: $\eta = 10$ (optimal balance of speed and stability)
+\item \textbf{Step Budget}: 512 or 1024 steps (sufficient for convergence)
+\item \textbf{Loss Threshold}: $\tau = 0.01$ (tight precision requirement for early stopping)
+\end{itemize}
+
+\subsection{Hardware Configuration}
+
+All experiments were conducted on:
+\begin{itemize}
+\item NVIDIA A100 GPUs (1-4 units depending on experiment)
+\item PyTorch framework with CUDA most recent  acceleration such as Flash Attention \citep{dao2022flashattention, dao2023flashattention2}
+\item Gradient checkpointing for memory efficiency
+\end{itemize}
+
+\section{Frequency Domain Analysis}\label{appendix:frequency_analysis}
+
+Proposed spectral analysis ensures that invariant set membership relies on semantic rather than imperceptible features.
+
+\subsection{Filter Implementation}
+
+The ideal low-pass filters were applied in frequency domain:
+\begin{equation}
+\mathcal{F}_{cutoff}(\mathbf{x}) = \mathcal{F}^{-1}(\mathbf{H}_{cutoff} \cdot \mathcal{F}(\mathbf{x}))
+\end{equation}
+
+where $\mathbf{H}_{cutoff}$ removes frequencies beyond the cutoff threshold.
+
+\subsection{Analysis Protocol}
+
+For each generated sample, the following protocol was followed:
+\begin{enumerate}
+\item Apply filters with cutoffs from 0.1 to 0.9
+\item Compute network response on filtered images
+\item Measure deviation from target response
+\item Plot spectral preservation across frequency bands
+\end{enumerate}
+
+\subsection{Quality Interpretation}
+
+Low deviations at high cutoff values indicate that invariance is preserved even when fine details are removed, confirming semantic rather than adversarial invariance.
+
+\section{Neuron Selection Methodology}\label{appendix:neuron_selection}
+
+The interpretable neurons were selected using the Semantic Lens framework \citep{dreyer2025mechanisticunderstandingvalidationlarge}.
+
+\subsection{Selection Criteria}
+
+Neurons were chosen based on:
+\begin{itemize}
+\item \textbf{Semantic Alignment}: Score $r > 0.85$ (high interpretability)
+\item \textbf{Concept Clarity}: Clear, consistent activation patterns
+\item \textbf{Diversity}: Different semantic categories (geometric, biological, textural)
+\end{itemize}
+
+\subsection{Selected Neurons}
+
+The three target neurons were selected:
+\begin{itemize}
+\item \textbf{Neuron \#1656}: Zebra striping patterns ($r = 0.945$)
+\item \textbf{Neuron \#1052}: Honeycomb structures ($r = 0.880$)
+\item \textbf{Neuron \#421}: Gyromitra morphology ($r = 0.952$)
+\end{itemize}
+
+These represent well-understood, semantically interpretable units with high activation specificity.
+
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[height=0.2\textheight]{figures/appendix/sae_407.pdf}
+  \caption{Appendix results - Class 407 (ambulance) - Neuron \#1807: flashing emergency lights. Generated images demonstrate semantic diversity while maintaining identical activation levels (32 samples, 1024 optimization steps).}
+  \label{fig:appendix_407}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[height=0.2\textheight]{figures/appendix/sae_822.pdf}
+  \caption{Appendix results - Class 822 (steel drum) - Neuron \#1935: reflective metal finish. Generated images demonstrate semantic diversity while maintaining identical activation levels (32 samples, 1024 optimization steps).}
+  \label{fig:appendix_822}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[height=0.2\textheight]{figures/appendix/sae_70.pdf}
+  \caption{Appendix results - Class 70 (harvestman) - Neuron \#1581: thin, wiry legs. Generated images demonstrate semantic diversity while maintaining identical activation levels (32 samples, 1024 optimization steps).}
+  \label{fig:appendix_70}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[height=0.2\textheight]{figures/appendix/sae_817.pdf}
+  \caption{Appendix results - Class 817 (sports car) - Neuron \#1507: wide tires. Generated images demonstrate semantic diversity while maintaining identical activation levels (32 samples, 1024 optimization steps).}
+  \label{fig:appendix_817}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[height=0.2\textheight]{figures/appendix/sae_804.pdf}
+  \caption{Appendix results - Class 804 (soap dispenser) - Neuron \#1066: liquid soap inside. Generated images demonstrate semantic diversity while maintaining identical activation levels (32 samples, 1024 optimization steps).}
+  \label{fig:appendix_804}
+\end{figure}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Neuron} & \textbf{Concept} & \textbf{$L_2$ Loss} & \textbf{FID Score} & \textbf{Std Dev} \\
+\midrule
+\#1807 & Ambulance - Flashing Emergency Lights & 0.33 & 7.95 & 0.20 \\
+\#1935 & Steel Drum - Reflective Metal Finish & 1.43 & 7.72 & 0.30 \\
+\#1581 & Harvestman - Thin Wiry Legs & 0.40 & 7.73 & 0.32 \\
+\#1507 & Sports Car - Wide Tires & 1.35 & 8.08 & 0.08 \\
+\#1066 & Soap Dispenser - Liquid Soap Inside & 0.27 & 8.07 & 0.22 \\
+\midrule
+\textbf{Average} & -- & \textbf{0.76 $\pm$ 0.24} & \textbf{7.91} & \textbf{0.22} \\
+\bottomrule
+\end{tabular}
+\caption{Extended quantitative evaluation results for additional ImageNet classes. $L_2$ losses computed on unbounded activation logits; FID scores computed against ImageNet-1k image statistics. Standard deviation represents variability across generated samples. Results averaged over 32 generated samples per neuron.}
+\label{tab:appendix_results}
+\end{table}
