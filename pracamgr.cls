@@ -30,8 +30,8 @@
 \def\@rodzajpracy{\ifmyclass@en Master's\else magisterska\fi}
 \def\@stopien{\ifmyclass@en Master\else magister\fi}
 \DeclareOption{licencjacka}{
-	\def\@stopien{\ifmyclass@en Bachelor\else licencjat\fi}
-	\def\@rodzajpracy{\ifmyclass@en Bachelor's\else licencjacka\fi}
+	\def\@stopien{\ifmyclass@en Master\else magistersk\fi}
+	\def\@rodzajpracy{\ifmyclass@en Master's\else magisterska\fi}
 }
 %\DeclareOption{licencjacka}{}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\@baseclass}}

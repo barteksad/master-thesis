@@ -16,17 +16,17 @@ Perturbation-based methods such as LIME \citep{ribeiro2016whyitrustyou} and SHAP
 
 Concept-based explainability methods attempt to understand models in terms of human-interpretable concepts. Concept Activation Vectors (CAVs) \citep{kim2018interpretabilityfeatureattributionquantitative} learn linear directions in activation space that correspond to human-defined concepts. Network Dissection \citep{bau2017networkdissectionquantifyinginterpretability} automatically discovers concepts by correlating individual neurons with semantic segmentation labels.
 
-More recent work has focused on discovering concepts automatically without human supervision. ACE (Automatic Concept Extraction) \citep{ghorbani2019automaticconceptbasedexplanations} uses unsupervised segmentation to identify important concepts, while TCAV (Testing with CAVs) \citep{kim2018interpretabilityfeatureattributionquantitative} provides statistical significance testing for concept importance.
+More recent work has focused on discovering concepts automatically without human supervision. ACE (Automatic Concept Extraction) \cite{ghorbani2019automaticconceptbasedexplanations} uses unsupervised segmentation to identify important concepts, while TCAV (Testing with CAVs) \cite{kim2018interpretabilityfeatureattributionquantitative} provides statistical significance testing for concept importance.
 
 \subsection{Counterfactual Explanations}
 
-Counterfactual explanations answer the question "What would need to change for the model to make a different prediction?" This paradigm has gained popularity due to its intuitive nature and practical utility. Although earlier work has explored generative models for visual counterfactual explanations, \citep{sobieski2024rethinkingvisualcounterfactualexplanations} advanced this direction in a way that directly inspired proposed approach. This method is, to best knowledge, the first to combine high-quality results with almost real-time performance.
+Counterfactual explanations answer the question "What would need to change for the model to make a different prediction?" This paradigm has gained popularity due to its intuitive nature and practical utility. Although earlier work has explored generative models for visual counterfactual explanations, \cite{sobieski2024rethinkingvisualcounterfactualexplanations} advanced this direction in a way that directly inspired proposed approach. This method is, to best knowledge, the first to combine high-quality results with almost real-time performance.
 
 In counterfactual methods, the objective is generally defined as finding the smallest possible changes to an input that alter the model’s decision—for example, modifying a few pixels in an image so that the predicted class changes. In contrast, the goal of this work is to generate diverse examples that preserve the original prediction.
 
 \section{Score-Based Generative Models}\label{sec:sgm_background}
 
-Score-based generative models (SGMs) have emerged as a powerful framework for high-quality image generation. Following the seminal work of \citep{song2021scorebasedgenerativemodelingstochastic}, these models can be understood through the lens of stochastic differential equations (SDEs).
+Score-based generative models (SGMs) have emerged as a powerful framework for high-quality image generation. Following the seminal work of \cite{song2021scorebasedgenerativemodelingstochastic}, these models can be understood through the lens of stochastic differential equations (SDEs).
 
 \subsection{Mathematical Foundation}
 
@@ -261,7 +261,7 @@ The prevalence and consistency of such unrealistic results across different arch
 
 \section{Concept Discovery and Spurious Feature Detection}
 
-Understanding what concepts neural networks learn has been an active area of research. \citep{Lapuschkin_2019} developed SpRAy, an automatic pipeline for exploring shortcuts and biases learned by models, often referred to as "Clever Hans" effects \citep{pfungst1911cleverHans}. \citet{neuhaus2023spuriousfeatureslargescale} investigates methods for automatically finding spurious features in training data.
+Understanding what concepts neural networks learn has been an active area of research. \cite{Lapuschkin_2019} developed SpRAy, an automatic pipeline for exploring shortcuts and biases learned by models, often referred to as "Clever Hans" effects \citep{pfungst1911cleverHans}. \citet{neuhaus2023spuriousfeatureslargescale} investigates methods for automatically finding spurious features in training data.
 
 Recent work by \citet{dreyer2025mechanisticunderstandingvalidationlarge} addresses the question of what concepts were learned by models and where in the training data they were present. However, \citep{leask2025sparse} argues that automatically discovered concepts may lack atomicity and completeness.
 
@@ -275,17 +275,9 @@ The fundamental challenge in generative neural network interpretability extends 
 
 Natural images exhibit specific statistical regularities that distinguish them from artificial or adversarial patterns. These regularities, developed through millions of years of evolution in biological vision systems and refined through decades of computer vision research, provide objective criteria for evaluating the realism of generated images.
 
-The most fundamental characteristic of natural images is their power spectral density, which typically follows a $1/f^2$ power law across spatial frequencies \citep{field1987relations}. This spectral signature reflects the hierarchical structure of natural scenes, where large-scale geometric arrangements (buildings, horizons, object boundaries) contribute low-frequency components, while fine-grained details (textures, edges, surface patterns) contribute higher frequencies. Deviations from this spectral profile often indicate artificial generation or adversarial manipulation.
+The most fundamental characteristic of natural images is their power spectral density, which typically follows a $1/f^2$ power law across spatial frequencies \citep{Field1987RelationsBT}. This spectral signature reflects the hierarchical structure of natural scenes, where large-scale geometric arrangements (buildings, horizons, object boundaries) contribute low-frequency components, while fine-grained details (textures, edges, surface patterns) contribute higher frequencies. Deviations from this spectral profile often indicate artificial generation or adversarial manipulation.
 
 Beyond spectral properties, natural images exhibit specific statistical dependencies between neighboring pixels, consistent edge orientation distributions, and characteristic amplitude distributions in wavelet decompositions. These properties emerge from the physical processes that generate natural scenes—lighting conditions, surface materials, atmospheric scattering, and optical properties of imaging systems—and provide robust signatures for distinguishing realistic from artificial imagery.
-
-\subsection{The Realism Imperative in Explainable AI}
-
-For explainable AI applications, the requirement for realistic generation transcends technical considerations to address fundamental epistemological questions about the validity of synthetic explanations. If interpretation methods systematically produce unrealistic visualizations, they risk providing misleading insights about how neural networks process natural inputs.
-
-Consider the implications of unrealistic explanations for different stakeholders: researchers developing new architectures may draw incorrect conclusions about feature learning if their analysis tools produce artificial patterns; practitioners deploying models in safety-critical applications may develop false confidence if explanations appear to show reasonable behavior on unrealistic inputs; and users of AI systems may lose trust if explanations appear divorced from recognizable visual concepts.
-
-The realism constraint serves as a crucial validity check that ensures generated explanations remain grounded in the visual world that neural networks are designed to understand. By constraining interpretation methods to produce realistic images, this work ensures that insights reflect genuine computational strategies rather than artifacts of the interpretation process itself.
 
 \subsection{Approaches to Ensuring Visual Realism}
 
@@ -344,8 +336,6 @@ The analysis reveals several critical limitations that collectively constrain th
 After analysis of these diverse approaches and their limitations, the conclusion is that the field fundamentally lacks a unified framework for comprehensive exploration of neural network decision spaces beyond the constraints of observed training data. Specifically, current explainable AI research lacks:
 
 \textbf{Generative Exploration Capabilities:} The field lacks methods that can systematically explore the space of alternative inputs yielding identical predictions while maintaining realistic visual appearance. This limitation prevents comprehensive understanding of model invariance properties and equivalence classes that define decision-making behavior.
-
-\textbf{Invariance Set Analysis:} Current approaches lack the theoretical and methodological foundations for systematically analyzing the complete manifold of inputs that produce identical model outputs. Without this capability, interpretability remains fundamentally incomplete, missing crucial insights about model robustness, generalization, and potential failure modes.
 
 \textbf{Multi-Scale Interpretability Integration:} The field lacks unified approaches that can simultaneously address interpretability at multiple scales—from individual neurons to complete model outputs—within a single coherent framework. This limitation fragments understanding and prevents development of comprehensive theories of neural network behavior.
 

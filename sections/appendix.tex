@@ -1,84 +1,30 @@
 \appendix
 
-\section{Infinite Optimization Algorithm}\label{appendix:infinite_optimization}
-This appendix provides the detailed algorithmic specification for proposed invariant set generation method, adapted from the infinite optimization approach. Unlike the original text-conditioned diffusion guidance, the algorithm is specifically designed for generating images that belong to the same invariant set as a given query point.
+\chapter{Appendix}\label{r:appendix}
 
-\begin{algorithm}[H]
-\caption{Invariant Set Generation via Infinite Optimization}
-\label{alg:invariant_generation}
-\begin{algorithmic}[1]
-\Require Loss function $\mathcal{L}$, Query point $\mathbf{x^*}$, Target value $\mathcal{L}(\mathbf{x^*})$, Step budget $B$, Loss threshold $\tau$, Learning rate $\eta$, Step size $\lambda$, Low-pass filter $\mathcal{F}$
-\Ensure Generated sample $x$ such that $\mathcal{L}(x) \approx \mathcal{L}(\mathbf{x^*})$
 
-\State $z_T \sim \mathcal{N}(0, I)$ \Comment{Draw starting latent}
-\State $target\_value = \mathcal{L}(\mathbf{x^*})$ \Comment{Store target invariant value}
+\section{Supplementary Algorithmic Details}\label{appendix:infinite_optimization}
+This section provides supplementary algorithmic details that complement the main algorithmic specification presented in the method chapter. The focus here is on implementation nuances and technical considerations that support the primary algorithm description.
 
-\For{$t = 1, \ldots, T$} \Comment{Initialize time step-dependent variables}
-    \State $C_t = \emptyset$ \Comment{No conditioning (unconditional generation)}
-\EndFor
+\subsection{Key Algorithmic Adaptations}
 
-\State $optim = \text{SGD}(z_T, \text{lr}=\eta)$ \Comment{Define the optimizer}
+The EquiDiff implementation introduces several important modifications to the original infinite optimization framework to suit invariant set generation requirements. Unlike the original text-conditioned approach, the method employs unconditional diffusion models with $C_t = \emptyset$ for all timesteps, relying entirely on the optimization process to guide generation toward the target invariant set. This unconditional approach eliminates the need for complex conditioning mechanisms while maintaining precise control over network activations.
 
-\State $step\_count = 0$ \Comment{Initialize step counter}
-\While{$step\_count < B$} \Comment{Optimization loop with budget}
-    \State $z = z_T$ \Comment{Reset to starting latent}
-    
-    \For{$t = T, \ldots, 1$} \Comment{Denoising loop}
-        \State \textbf{with} gradient\_checkpointing():
-        \State \quad $z = \text{LightningDiT\_step}(z, t)$ \Comment{Diffusion update according to LightningDiT}
-    \EndFor
-    
-    \State $x = \mathcal{D}(z)$ \Comment{Decode final latent using VAE decoder}
-    \State $current\_value = \mathcal{L}(x)$ \Comment{Calculate unfiltered objective value}
-    \State $x_{filtered} = \mathcal{F}(x)$ \Comment{Apply low-pass filter}
-    \State $current\_value_{filtered} = \mathcal{L}(x_{filtered})$ \Comment{Calculate filtered objective value}
-    
-    \State $loss_1 = \|current\_value - target\_value\|^2$ \Comment{Unfiltered invariant set loss}
-    \State $loss_2 = \|current\_value_{filtered} - target\_value\|^2$ \Comment{Filtered invariant set loss}
-    \State $total\_loss = \lambda \cdot (loss_1 + loss_2)$ \Comment{Combined loss with step size}
-    
-    \If{$total\_loss < \tau$} \Comment{Check convergence threshold}
-        \State \textbf{break} \Comment{Early termination}
-    \EndIf
-    
-    \State $total\_loss$.backward() \Comment{Calculate gradients w.r.t. $z_T$}
-    
-    \State $optim$.step() \Comment{Update starting latent}
-    \State $optim$.zero\_grad() \Comment{Clear gradients}
-    \State $step\_count = step\_count + 1$ \Comment{Increment step counter}
-\EndWhile
+The invariant set objective represents a fundamental departure from traditional diffusion guidance approaches. Instead of optimizing for text-image alignment or other external conditioning signals, the method minimizes the $L_2$ distance between $\mathcal{L}(x)$ and the target value $\mathcal{L}(\mathbf{x^*})$, ensuring membership in the same invariant set through direct activation matching. This objective design enables precise control over specific neural network components while maintaining the flexibility to target various network architectures and layer configurations.
 
-\State \Return $z_T$, $x$ \Comment{Return optimized latent and final image}
-\end{algorithmic}
-\end{algorithm}
+Frequency domain filtering integration constitutes a novel contribution that addresses the fundamental challenge of adversarial solutions in optimization-based generation. The incorporation of low-pass filter $\mathcal{F}$ before computing the objective function ensures that invariant set membership is achieved through perceptually meaningful variations rather than high-frequency adversarial noise. This filtering mechanism operates as a regularization constraint that guides the optimization toward semantically coherent solutions.
 
-\subsection{Key Differences from Original Algorithm}
+The LightningDiT integration requires careful consideration of the specific sampling procedures and update rules that may differ from standard DDIM implementations. The denoising process follows the LightningDiT sampling procedure, which incorporates architectural optimizations and potentially different noise schedules that affect the gradient flow and optimization dynamics throughout the generation process.
 
-The adaptation introduces several important modifications to suit invariant set generation:
+\subsection{Computational Resource Management}
 
-\begin{itemize}
-    \item \textbf{Unconditional Generation}: Unlike the original text-conditioned approach, we use unconditional diffusion models ($C_t = \emptyset$) and rely entirely on the optimization process to guide generation toward the target invariant set.
-    
-    \item \textbf{Invariant Set Objective}: Instead of optimizing for text-image alignment, we minimize the $L_2$ distance between $\mathcal{L}(x)$ and the target value $\mathcal{L}(\mathbf{x^*})$, ensuring membership in the same invariant set.
-    
-    \item \textbf{Frequency Domain Filtering}: We incorporate a low-pass filter $\mathcal{F}$ before computing the objective function to ensure that invariant set membership is achieved through perceptually meaningful variations rather than high-frequency adversarial noise.
-    
-    \item \textbf{LightningDiT Integration}: The diffusion denoising process follows the LightningDiT sampling procedure, which may use different update rules than standard DDIM depending on the specific implementation and training configuration.
-\end{itemize}
+The infinite optimization approach demands sophisticated computational resource management to achieve practical scalability while maintaining solution quality. Gradient checkpointing implementation during the denoising loop reduces memory consumption while maintaining gradient flow through the entire diffusion process. This technique enables optimization through deep diffusion pipelines without prohibitive memory requirements, making the approach feasible on standard research hardware configurations.
 
-\subsection{Computational Considerations}
+Optimizer selection represents a critical design decision that significantly impacts convergence stability and solution quality. Empirical evaluation demonstrates that SGD exhibits superior convergence properties for invariant set generation compared to adaptive methods like Adam, particularly in the high-dimensional latent spaces characteristic of diffusion models. The inherent stochasticity of SGD updates provides beneficial exploration properties that help escape local minima corresponding to suboptimal invariant set members.
 
-The infinite optimization approach requires careful management of computational resources:
+Step budget management balances computational cost with solution quality through careful parameter selection for both the step budget $B$ and threshold $\tau$ parameters. This approach enables early termination for efficient optimization landscapes while providing computational bounds for practical implementation. The dual termination criteria ensure that the algorithm can adapt to varying optimization difficulty across different invariant set generation tasks.
 
-\begin{itemize}
-    \item \textbf{Gradient Checkpointing}: We employ gradient checkpointing during the denoising loop to reduce memory consumption while maintaining gradient flow through the entire diffusion process.
-    
-    \item \textbf{Optimizer Selection}: Based on empirical evaluation, SGD demonstrates superior convergence properties for invariant set generation compared to adaptive methods like Adam.
-    
-    \item \textbf{Step Budget Management}: The algorithm balances computational cost with solution quality through the step budget $B$ and threshold $\tau$ parameters, enabling early termination for efficient optimization landscapes.
-    
-    \item \textbf{Dual Loss Computation}: Computing both filtered and unfiltered objective values provides robustness against adversarial solutions while maintaining semantic coherence in generated samples.
-\end{itemize}
+Dual loss computation provides robustness against adversarial solutions while maintaining semantic coherence in generated samples. Computing both filtered and unfiltered objective values throughout the optimization process ensures that solutions satisfy invariant set membership requirements across multiple frequency bands, preventing optimization from exploiting imperceptible high-frequency patterns that could compromise semantic meaningfulness.
 
 \section{Level Set Theory Foundation}\label{appendix:level_sets}
 
@@ -112,22 +58,15 @@ This section provides the specific implementation parameters used throughout the
 
 \subsection{Optimization Configuration}
 
-Based on empirical evaluation, the following parameters were selected:
-\begin{itemize}
-\item \textbf{Optimizer}: SGD (most stable convergence)
-\item \textbf{Learning Rate}: $\eta = 10$ (optimal balance of speed and stability)
-\item \textbf{Step Budget}: 512 or 1024 steps (sufficient for convergence)
-\item \textbf{Loss Threshold}: $\tau = 0.01$ (tight precision requirement for early stopping)
-\end{itemize}
+Based on empirical evaluation across multiple experimental conditions, the optimization configuration employs SGD as the primary optimizer due to its demonstrated superior convergence stability compared to adaptive methods in the high-dimensional latent spaces characteristic of diffusion models. The learning rate is set to $\eta = 10$, which provides an optimal balance between convergence speed and optimization stability, enabling rapid progress toward invariant set membership while maintaining numerical stability throughout the gradient flow process.
+
+The step budget configuration uses either 512 or 1024 optimization steps depending on the complexity of the target invariant set and the precision requirements of the specific experiment. This range proves sufficient for convergence across the evaluated network architectures and target activation patterns while providing computational bounds for practical implementation. The loss threshold is configured at $\tau = 0.01$, establishing a tight precision requirement for early stopping that ensures invariant set membership within acceptable tolerance levels while preventing unnecessary computational overhead from over-optimization.
 
 \subsection{Hardware Configuration}
 
-All experiments were conducted on:
-\begin{itemize}
-\item NVIDIA A100 GPUs (1-4 units depending on experiment)
-\item PyTorch framework with CUDA most recent  acceleration such as Flash Attention \citep{dao2022flashattention, dao2023flashattention2}
-\item Gradient checkpointing for memory efficiency
-\end{itemize}
+All experimental evaluations were conducted on NVIDIA A100 GPU configurations ranging from single-unit setups for smaller-scale experiments to four-unit parallel configurations for computationally intensive invariant set generation tasks. The implementation leverages the PyTorch framework with comprehensive CUDA acceleration capabilities, including state-of-the-art optimizations such as Flash Attention mechanisms that significantly improve memory efficiency and computational throughput during the attention operations within the diffusion model architecture.
+
+Gradient checkpointing integration provides essential memory efficiency improvements that enable the deep computational graphs required for invariant set optimization while maintaining full gradient information for precise latent space updates. This approach proves critical for practical implementation on research hardware configurations, allowing complex invariant set generation tasks to execute within standard GPU memory constraints without compromising optimization accuracy or convergence properties.
 
 \section{Frequency Domain Analysis}\label{appendix:frequency_analysis}
 
@@ -144,41 +83,97 @@ where $\mathbf{H}_{cutoff}$ removes frequencies beyond the cutoff threshold.
 
 \subsection{Analysis Protocol}
 
-For each generated sample, the following protocol was followed:
-\begin{enumerate}
-\item Apply filters with cutoffs from 0.1 to 0.9
-\item Compute network response on filtered images
-\item Measure deviation from target response
-\item Plot spectral preservation across frequency bands
-\end{enumerate}
+For each generated sample, a comprehensive spectral analysis protocol evaluates the semantic robustness of invariant set membership across multiple frequency bands. The analysis begins by applying ideal low-pass filters with cutoff frequencies ranging from 0.1 to 0.9 normalized to the Nyquist limit, systematically removing high-frequency components to isolate the contribution of different spectral bands to network activation patterns. Following the filtering operations, the network response is computed on each filtered image variant to quantify how activation patterns change as fine-scale details are progressively removed from the generated samples.
+
+The deviation measurement phase quantifies the difference between filtered and unfiltered network responses, providing a quantitative assessment of the frequency dependence of invariant set membership. Finally, spectral preservation analysis plots the measured deviations across different frequency bands, revealing the frequency components essential for maintaining specific network activations and confirming the semantic rather than adversarial nature of the generated variations.
 
 \subsection{Quality Interpretation}
 
-Low deviations at high cutoff values indicate that invariance is preserved even when fine details are removed, confirming semantic rather than adversarial invariance.
+Low deviations at high cutoff values indicate that invariance is preserved even when fine details are removed, confirming semantic rather than adversarial invariance. This pattern demonstrates that the generated invariant set members rely primarily on low-frequency semantic content rather than imperceptible high-frequency perturbations, validating the effectiveness of the frequency domain constraints in preventing adversarial solutions.
+
+\section{Hyperparameter Optimization}\label{appendix:hyperparameters}
+
+This section presents the comprehensive hyperparameter optimization study conducted to identify optimal configurations for invariant set generation. The optimization process evaluated multiple optimizer types, learning rates, and spectral filter configurations across diverse experimental conditions to establish robust parameter settings for reliable invariant set generation.
+
+\subsection{Grid Search Methodology}
+
+The hyperparameter optimization employed a systematic grid search approach across three key parameter categories: spectral filters, optimizers, and learning rates. The grid search was conducted using eight diverse test images, with eight invariant samples generated per image to ensure statistical reliability. For each parameter combination, the minimum $L_2$ loss over probability distributions (not logits) was recorded and analyzed to identify optimal configurations that consistently achieve tight constraint satisfaction across different visual content types.
+
+The evaluation methodology prioritized configurations that demonstrated consistent performance across all test images rather than exceptional performance on specific cases. This approach ensures that selected hyperparameters provide reliable invariant set generation across diverse semantic contexts and visual patterns, supporting the method's generalizability and practical applicability.
+
+\subsection{Spectral Filter Configuration}
+
+The spectral filter optimization evaluated three distinct filter types with their associated parameter ranges to identify configurations that effectively prevent adversarial solutions while maintaining semantic coherence. Table~\ref{tab:filter_configs} presents the comprehensive evaluation of filter types and their parameter ranges.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lllc}
+\toprule
+\textbf{Filter Type} & \textbf{Parameter} & \textbf{Range} & \textbf{Configurations} \\
+\midrule
+Ideal & Cutoff Frequency & 0.2, 0.3, 0.4, 0.5, 0.6 & 5 \\
+Gaussian & Sigma & 0.1, 0.15, 0.2, 0.25, 0.3, 0.35 & 6 \\
+Butterworth & Cutoff Frequency & 0.2, 0.3, 0.4, 0.5, 0.6 & 5 \\
+Butterworth & Order & 2, 4, 6, 8 & 4 \\
+\midrule
+\textbf{Total Combinations} & -- & -- & \textbf{20} \\
+\bottomrule
+\end{tabular}
+\caption{Spectral filter configurations evaluated during hyperparameter optimization. Each filter type was systematically evaluated across its parameter range to identify optimal configurations for semantic coherence preservation while preventing adversarial solutions.}
+\label{tab:filter_configs}
+\end{table}
+
+The Gaussian filter with sigma value 0.1 emerged as the optimal configuration, providing effective high-frequency noise suppression while preserving essential semantic content. This configuration demonstrated superior performance in maintaining semantic coherence across diverse visual patterns while effectively preventing the generation of adversarial artifacts that could compromise the interpretability of generated invariant sets.
+
+\subsection{Optimizer Performance Analysis}
+
+The optimizer evaluation compared four distinct optimization algorithms across multiple learning rate configurations to identify combinations that provide stable convergence and consistent constraint satisfaction. Table~\ref{tab:optimizer_performance} presents the comprehensive performance analysis across all evaluated optimizers.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Optimizer} & \textbf{Learning Rates} & \textbf{Min Loss} & \textbf{Max Loss} & \textbf{Std Dev} & \textbf{Convergence Quality} \\
+\midrule
+SGD & 1.0, 5.0, 10.0, 30.0, 50.0 & 0.0161 & 0.0674 & 0.0198 & Consistent \\
+Adam & 1.0, 5.0, 10.0, 30.0, 50.0 & 0.0892 & 0.2451 & 0.0623 & Poor \\
+Adagrad & 1.0, 5.0, 10.0, 30.0, 50.0 & 0.1134 & 0.3021 & 0.0751 & Poor \\
+Shampoo & 1.0, 5.0, 10.0, 30.0, 50.0 & 0.0001 & 0.2051 & 0.0891 & Variable \\
+\bottomrule
+\end{tabular}
+\caption{Optimizer performance comparison across learning rate configurations. Performance metrics represent aggregate statistics across eight test images with eight samples per image. Shampoo demonstrates the lowest minimum losses but high variability, while SGD provides consistent performance across all conditions.}
+\label{tab:optimizer_performance}
+\end{table}
+
+The analysis reveals that Shampoo optimizer achieves the lowest minimum $L_2$ losses, indicating superior optimization capability under ideal conditions. However, Shampoo exhibits high variance across different samples and images, suggesting sensitivity to initialization and optimization landscape characteristics. SGD demonstrates more consistent performance with lower standard deviation, indicating reliable convergence properties that support reproducible invariant set generation across diverse experimental conditions.
+
+\subsection{Final Configuration Selection}
+
+Based on comprehensive analysis across all parameter combinations, the optimal configuration combines SGD optimizer with learning rate 10.0 and Gaussian filter with sigma 0.1. This configuration consistently appears among the top-performing parameter sets across all eight test images, demonstrating robust performance across diverse visual content types.
+
+\subsection{Configuration Validation}
+
+The validation analysis examined the relationship between spectral properties of original images and optimization difficulty, revealing insights into the factors that influence invariant set generation complexity. Images with spectral energy concentrated in lower frequency bands generally demonstrate easier optimization landscapes, requiring fewer optimization steps to achieve tight constraint satisfaction.
+
+This observation suggests that the spectral characteristics of input images influence the optimization dynamics of invariant set generation, with low-frequency dominant images providing more favorable optimization conditions. The selected hyperparameter configuration demonstrates robust performance across this spectrum of optimization difficulties, supporting its applicability to diverse visual content types encountered in systematic experimental evaluation.
+
+The comprehensive hyperparameter optimization establishes a principled foundation for invariant set generation experiments, ensuring that reported results reflect the method's capabilities under optimal configuration rather than suboptimal parameter choices that could artificially limit performance or introduce systematic biases in experimental evaluation.
 
 \section{Neuron Selection Methodology}\label{appendix:neuron_selection}
 
-The interpretable neurons were selected using the Semantic Lens framework \citep{dreyer2025mechanisticunderstandingvalidationlarge}.
+The interpretable neurons were selected using the Semantic Lens framework \citep{dreyer2025mechanisticunderstandingvalidationlarge}, which provides systematic evaluation of neuron interpretability through quantitative semantic alignment metrics.
 
 \subsection{Selection Criteria}
 
-Neurons were chosen based on:
-\begin{itemize}
-\item \textbf{Semantic Alignment}: Score $r > 0.85$ (high interpretability)
-\item \textbf{Concept Clarity}: Clear, consistent activation patterns
-\item \textbf{Diversity}: Different semantic categories (geometric, biological, textural)
-\end{itemize}
+Neuron selection follows a rigorous evaluation process based on three complementary criteria that ensure both interpretability and experimental validity. The semantic alignment criterion requires neurons to achieve alignment scores $r > 0.85$, indicating high interpretability through strong correlation between neuron activations and human-interpretable visual concepts. This threshold ensures that selected neurons demonstrate clear, consistent responses to specific semantic patterns that can be reliably identified and validated through human evaluation.
+
+Concept clarity represents the second selection criterion, requiring neurons to exhibit clear and consistent activation patterns across multiple examples of their target concept. This criterion eliminates neurons with ambiguous or inconsistent responses that could compromise the reliability of invariant set generation experiments. The diversity criterion ensures coverage of different semantic categories including geometric patterns, biological structures, and textural features, providing comprehensive evaluation across various types of visual concepts and preventing bias toward specific pattern types.
 
 \subsection{Selected Neurons}
 
-The three target neurons were selected:
-\begin{itemize}
-\item \textbf{Neuron \#1656}: Zebra striping patterns ($r = 0.945$)
-\item \textbf{Neuron \#1052}: Honeycomb structures ($r = 0.880$)
-\item \textbf{Neuron \#421}: Gyromitra morphology ($r = 0.952$)
-\end{itemize}
+The experimental evaluation focuses on three carefully selected neurons that exemplify different categories of interpretable visual concepts. Neuron \#1656 demonstrates exceptional sensitivity to zebra striping patterns with an alignment score of $r = 0.945$, representing geometric pattern recognition capabilities that respond consistently to high-contrast alternating stripe configurations across various contexts and scales. Neuron \#1052 specializes in honeycomb structures with an alignment score of $r = 0.880$, exhibiting strong activation for hexagonal cellular patterns that appear in both natural and artificial contexts.
 
-These represent well-understood, semantically interpretable units with high activation specificity.
+Neuron \#421 focuses on Gyromitra morphology with the highest alignment score of $r = 0.952$, responding specifically to convoluted, brain-like surface textures characteristic of certain fungal structures. These three neurons represent well-understood, semantically interpretable units with high activation specificity, providing reliable targets for invariant set generation experiments while covering diverse semantic categories that enable comprehensive evaluation of the proposed method's capabilities across different types of visual concepts.
 
 
 \begin{figure}[p]
@@ -216,7 +211,7 @@ These represent well-understood, semantically interpretable units with high acti
   \label{fig:appendix_804}
 \end{figure}
 
-\begin{table}[h!]
+\begin{table}[ht!]
 \centering
 \begin{tabular}{lcccc}
 \toprule
@@ -234,3 +229,5 @@ These represent well-understood, semantically interpretable units with high acti
 \caption{Extended quantitative evaluation results for additional ImageNet classes. $L_2$ losses computed on unbounded activation logits; FID scores computed against ImageNet-1k image statistics. Standard deviation represents variability across generated samples. Results averaged over 32 generated samples per neuron.}
 \label{tab:appendix_results}
 \end{table}
+
+\clearpage
